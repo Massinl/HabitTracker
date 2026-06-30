@@ -1,6 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import ProfileDAO from "../dao/profile.dao";
-import { LoginRequest, RegisterRequest } from "../schemas/auth";
+import { LoginRequest, RegisterRequest } from "../schemas/profiles";
 
 class AuthHandler {
 
@@ -17,13 +17,17 @@ class AuthHandler {
             throw new Error("User was not created");
         }
 
-        const profile = await ProfileDAO.create({
-            id: data.user.id,
-            display_name: user.display_name,
-            phone: user.phone,
-        });
-        // this is for errors
-        return profile;
+        try {
+            const profile = await ProfileDAO.create({
+                id: data.user.id,
+                display_name: user.display_name,
+                phone: user.phone,
+            });
+            return profile;
+        } catch (profileError) {
+            await supabase.auth.admin.deleteUser(data.user.id).catch(() => {});
+            throw profileError;
+        }
     }
 
 
@@ -39,7 +43,9 @@ class AuthHandler {
             throw new Error("Login failed");
         }
 
-        return data.user;
+        const profile = await ProfileDAO.getById(data.user.id);
+
+        return { user: data.user, profile };
     }
 
     

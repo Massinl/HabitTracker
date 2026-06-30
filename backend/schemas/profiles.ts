@@ -17,3 +17,19 @@ export interface UpdateProfile {
     phone?: string;
     timezone?: string;
 }
+
+
+// authentication request 
+export interface RegisterRequest {
+    email: string;
+    password: string;
+    
+    display_name: string;
+    phone?: string;
+    timezone?: string;
+}
+
+export interface LoginRequest {
+    email: string;
+    password: string;
+}
